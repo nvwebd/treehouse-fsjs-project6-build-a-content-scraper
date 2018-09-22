@@ -14,8 +14,8 @@
 - To create the CSV file, use a CSV creation module.
 - Be sure to research the best package to use (see the project resources for a link to the video about how to choose a good npm package).
   Both packages should meet the following requirements:
-  -- At least 1,000 downloads
-  --Has been updated in the last six months
+  - At least 1,000 downloads
+  - Has been updated in the last six months
 
 ---
 
