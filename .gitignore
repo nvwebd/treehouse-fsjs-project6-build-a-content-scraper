@@ -1,6 +1,9 @@
 # .idea - webstorm
 .idea
 
+#.DS_Store
+.DS_Store
+
 data/
+logs/
 node_modules
-clear
