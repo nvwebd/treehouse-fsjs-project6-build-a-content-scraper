@@ -7,11 +7,15 @@ const errorLogger = require("./modules/errorLogger");
 
 const createDataFolderIfNotExisting = () => {
   if (!fs.existsSync("data")) {
-    fs.mkdir("data", 0o777, err => {
-      if (err === null) {
-        errorLogger.fullErrorLog(err, "Could not create the 'data' folder");
-        return err;
-      }
+    return new Promise((resolve, reject) => {
+      fs.mkdir("data", 0o777, err => {
+        if (err !== null) {
+          errorLogger.fullErrorLog(err);
+          reject(err);
+        } else {
+          resolve(true);
+        }
+      });
     });
   } else {
     return true;
@@ -48,9 +52,8 @@ const buildCSVObject = async () => {
               shirt.date = new Date();
               return Promise.resolve(shirt);
             })
-            .catch(error => {
+            .catch(() => {
               errorLogger.fullErrorLog(
-                error,
                 "There’s been a 404 error. Cannot connect to http://shirts4mike.com."
               );
             });
@@ -58,9 +61,8 @@ const buildCSVObject = async () => {
       );
       return Promise.resolve(allShirtsData);
     })
-    .catch(error => {
+    .catch(() => {
       errorLogger.fullErrorLog(
-        error,
         "There’s been a 404 error. Cannot connect to http://shirts4mike.com."
       );
     });
@@ -87,7 +89,6 @@ const createCSV = async shirts => {
       (err, output) => {
         if (err) {
           errorLogger.fullErrorLog(
-            err,
             "Something went wrong with the CSV creation"
           );
           reject(err);
@@ -116,7 +117,7 @@ const writeCSVtoDataFolder = async csvString => {
       csvString,
       err => {
         if (err) {
-          errorLogger.fullErrorLog(err, "Failed creating the CSV file");
+          errorLogger.fullErrorLog("Failed creating the CSV file");
           reject(err);
         } else {
           resolve(true);
@@ -127,25 +128,23 @@ const writeCSVtoDataFolder = async csvString => {
 };
 
 (async () => {
-  const dataFolderStatus = createDataFolderIfNotExisting();
+  const dataFolderStatus = await createDataFolderIfNotExisting();
+
   if (dataFolderStatus) {
     const shirts = await buildCSVObject();
     const csvString = await createCSV(shirts);
+
     writeCSVtoDataFolder(csvString)
-      .then(fileWritten => {
+      .then(() => {
         process.exit(0);
       })
       .catch(err => {
-        errorLogger.fullErrorLog(err, "Couldn't write CSV file to data folder");
+        errorLogger.fullErrorLog("Couldn't write CSV file to data folder");
       });
-    // console.log("fileWritten: ", fileWritten);
-  } else if (dataFolderStatus === undefined) {
-    console.log("Created the folder 'data'!");
-  } else {
+  }  else {
     errorLogger.fullErrorLog(
       new Error("Something went wrong when creating 'data' folder!"),
       "Maybe you have insufficient access to the folder / file"
     );
-    process.exit(-1);
   }
 })();
