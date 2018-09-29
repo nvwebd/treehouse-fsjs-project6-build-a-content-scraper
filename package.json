@@ -1,0 +1,35 @@
+{
+  "name": "treehouse-fsjs-project6-build-a-content-scraper",
+  "version": "0.0.1",
+  "description": "content scraper built with node - fullstack JS - project 6",
+  "main": "index.js",
+  "engines": {
+    "node": ">=8.9.4"
+  },
+  "scripts": {
+    "start": "node src/scraper.js",
+    "dev": "nodemon src/scraper.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nvwebd/treehouse-fsjs-project6-build-a-content-scraper.git"
+  },
+  "keywords": [
+    "node",
+    "scraper"
+  ],
+  "author": "Nejc Vukovic - nvwebd.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nvwebd/treehouse-fsjs-project6-build-a-content-scraper/issues"
+  },
+  "homepage": "https://github.com/nvwebd/treehouse-fsjs-project6-build-a-content-scraper#readme",
+  "dependencies": {
+    "csv": "^3.1.0",
+    "scrape-it": "^5.0.5"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  }
+}
