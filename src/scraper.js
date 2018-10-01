@@ -23,7 +23,8 @@ const createDataFolderIfNotExisting = () => {
 };
 
 const buildCSVObject = async () => {
-  return await scrapeIt("http://shirts4mike.com/shirts.php", {
+  const connectUrl = "http://shirts4mike.com";
+  return await scrapeIt(`${connectUrl}/shirts.php`, {
     shirts: {
       listItem: ".products li a",
       data: {
@@ -41,29 +42,49 @@ const buildCSVObject = async () => {
       }
     }
   })
-    .then(({ data }) => {
-      const allShirtsData = Promise.all(
-        data.shirts.map(async shirt => {
-          return await scrapeIt(`http://shirts4mike.com/${shirt.url}`, {
-            price: ".price"
-          })
-            .then(({ data }) => {
-              shirt.price = data.price;
-              shirt.date = new Date();
-              return Promise.resolve(shirt);
+    .then(({ data, response }) => {
+      return new Promise((resolve, reject) => {
+        if (response.statusCode === 200) {
+          const allShirtsData = Promise.all(
+            data.shirts.map(async shirt => {
+              return await scrapeIt(`${connectUrl}/${shirt.url}`, {
+                price: ".price"
+              })
+                .then(({ data, response }) => {
+                  return new Promise((resolve, reject) => {
+                    if (response.statusCode === 200) {
+                      shirt.price = data.price;
+                      shirt.date = new Date();
+                      resolve(shirt);
+                    } else {
+                      reject({
+                        errCode: response.statusCode,
+                        errMessage: response.statusMessage
+                      });
+                    }
+                  });
+                })
+                .catch(err => {
+                  errorLogger.fullErrorLog(
+                    `There’s been a ${err.errCode} error. ${
+                      err.errMessage
+                    } with URL: ${connectUrl}`
+                  );
+                });
             })
-            .catch(() => {
-              errorLogger.fullErrorLog(
-                "There’s been a 404 error. Cannot connect to http://shirts4mike.com."
-              );
-            });
-        })
-      );
-      return Promise.resolve(allShirtsData);
+          );
+          resolve(allShirtsData);
+        } else {
+          reject({
+            errCode: response.statusCode,
+            errMessage: response.statusMessage
+          });
+        }
+      });
     })
-    .catch(() => {
+    .catch(err => {
       errorLogger.fullErrorLog(
-        "There’s been a 404 error. Cannot connect to http://shirts4mike.com."
+        `There’s been a ${err.errCode} error. ${err.errMessage} with URL: ${connectUrl}`
       );
     });
 };
@@ -81,7 +102,6 @@ const createCSV = async shirts => {
           url: "URL",
           date: "Time"
         },
-        delimiter: ";",
         formatters: {
           date: value => value.toISOString()
         }
@@ -141,7 +161,7 @@ const writeCSVtoDataFolder = async csvString => {
       .catch(err => {
         errorLogger.fullErrorLog("Couldn't write CSV file to data folder");
       });
-  }  else {
+  } else {
     errorLogger.fullErrorLog(
       new Error("Something went wrong when creating 'data' folder!"),
       "Maybe you have insufficient access to the folder / file"
