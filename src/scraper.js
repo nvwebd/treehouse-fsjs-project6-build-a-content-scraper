@@ -82,9 +82,9 @@ const buildCSVObject = async () => {
         }
       });
     })
-    .catch(err => {
+    .catch(() => {
       errorLogger.fullErrorLog(
-        `There’s been a ${err.errCode} error. ${err.errMessage} with URL: ${connectUrl}`
+        `There’s been a 404 error. Can't connect to ${connectUrl} - check your internet access`
       );
     });
 };
@@ -122,7 +122,7 @@ const createCSV = async shirts => {
 
 const buildCurrentDateForCSVFilename = () => {
   const fullYear = new Date().getFullYear();
-  const month = new Date().getMonth();
+  const month = new Date().getMonth() + 1;
   const day = new Date().getDate();
 
   return Promise.resolve(`${fullYear}-${month}-${day}`);
