@@ -7,6 +7,7 @@ const errorLogger = require("./modules/errorLogger");
 
 const createDataFolderIfNotExisting = () => {
   if (!fs.existsSync("data")) {
+    console.log("Creating 'data' folder...");
     return new Promise((resolve, reject) => {
       fs.mkdir("data", 0o777, err => {
         if (err !== null) {
@@ -18,11 +19,13 @@ const createDataFolderIfNotExisting = () => {
       });
     });
   } else {
+    console.log("Folder 'data' already exists, skipping...");
     return true;
   }
 };
 
 const buildCSVObject = async () => {
+  console.log("Fetching the data!");
   const connectUrl = "http://shirts4mike.com";
   return await scrapeIt(`${connectUrl}/shirts.php`, {
     shirts: {
@@ -73,6 +76,7 @@ const buildCSVObject = async () => {
                 });
             })
           );
+          console.log("Scraped data: ", allShirtsData);
           resolve(allShirtsData);
         } else {
           reject({
@@ -90,6 +94,7 @@ const buildCSVObject = async () => {
 };
 
 const createCSV = async shirts => {
+  console.log("Creating CSV file!");
   return new Promise((resolve, reject) => {
     csv.stringify(
       shirts,
@@ -130,7 +135,7 @@ const buildCurrentDateForCSVFilename = () => {
 
 const writeCSVtoDataFolder = async csvString => {
   const getCurrentDate = await buildCurrentDateForCSVFilename();
-
+  console.log("Writting CSV data to a CSV file...");
   return await new Promise((resolve, reject) => {
     fs.writeFile(
       `${__dirname}/../data/${getCurrentDate}.csv`,
@@ -140,6 +145,7 @@ const writeCSVtoDataFolder = async csvString => {
           errorLogger.fullErrorLog("Failed creating the CSV file");
           reject(err);
         } else {
+          console.log("CSV file written!");
           resolve(true);
         }
       }
@@ -156,6 +162,7 @@ const writeCSVtoDataFolder = async csvString => {
 
     writeCSVtoDataFolder(csvString)
       .then(() => {
+        console.log("Thank you for using this content scraper :)");
         process.exit(0);
       })
       .catch(err => {
